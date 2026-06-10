@@ -7,7 +7,6 @@ import ScrollReveal from "@/components/ScrollReveal";
 import SpotlightCard from "@/components/SpotlightCard";
 import { cn, formatPrice } from "@/lib/utils";
 import Float from "@/components/fancy/blocks/float";
-import SplashCursor from "@/components/SplashCursor";
 import Particles from "@/components/Particles";
 
 /* ---------- Types & initial data ---------- */
@@ -55,38 +54,21 @@ const RITUAL_STEPS = [
   { step: "03", title: "Remember", text: "Do not over-apply. The object is not to announce yourself but to stay." },
 ];
 
-const NOISE_CSS = `
-  .noise-overlay::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 9998;
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 200px 200px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .noise-overlay::after { animation: none; opacity: 0.02; }
-  }
-`;
-
 /* ---------- Page ---------- */
 
 export default function HomePage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [toast, setToast] = useState<ToastState>({ visible: false, message: "" });
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + item.price * item.quantity, 0), [cart]);
 
   useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = NOISE_CSS;
-    document.head.appendChild(style);
-    return () => { document.head.removeChild(style); };
+    const onMouseMove = (e: MouseEvent) => setCursorPos({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
   }, []);
 
   useEffect(() => {
@@ -134,7 +116,21 @@ export default function HomePage() {
   };
 
   return (
-    <div className="noise-overlay min-h-screen bg-ink text-bone-dim">
+    <div className="relative min-h-screen bg-[#0a0a0a] text-[#e8e0d4]">
+      {/* Custom cursor */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-[70] mix-blend-difference"
+        style={{ opacity: 0.6 }}
+      >
+        <div
+          className="absolute h-3 w-3 rounded-full bg-[#e8e0d4]"
+          style={{
+            transform: `translate(${cursorPos.x - 6}px, ${cursorPos.y - 6}px)`,
+            transition: "transform 0.15s ease-out",
+          }}
+        />
+      </div>
 
       {/* ==================== TOAST ==================== */}
       <div
@@ -144,30 +140,30 @@ export default function HomePage() {
           toast.visible ? "opacity-100" : "pointer-events-none opacity-0 translate-y-2",
         )}
       >
-        <div className="rounded-full border border-gold/70 bg-ink-soft px-5 py-3 text-[11px] font-mono uppercase tracking-wider text-bone shadow-[0_12px_40px_-12px_rgba(0,0,0,0.7)]">
+        <div className="rounded-full border border-[#a68a64]/60 bg-[#0d0c0b] px-5 py-3 text-[11px] font-mono uppercase tracking-wider text-[#e8e0d4]">
           {toast.message}
         </div>
       </div>
 
       {/* ==================== NAV ==================== */}
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-ink-soft/60 bg-ink/75 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <a href="#" className="font-display text-2xl tracking-wide text-bone sm:text-[26px]">
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-[#a68a64]/20 bg-[#0a0a0a]/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <a href="#" className="font-display text-2xl tracking-wide text-[#e8e0d4] sm:text-[26px]">
             Maison Ode
           </a>
-          <nav className="hidden items-center gap-8 text-[11px] font-medium uppercase tracking-[0.24em] md:flex">
-            <a href="#manifesto" className="text-bone-dim transition-colors duration-300 hover:text-gold">Manifesto</a>
-            <a href="#products" className="text-bone-dim transition-colors duration-300 hover:text-gold">Collection</a>
-            <a href="#ritual" className="text-bone-dim transition-colors duration-300 hover:text-gold">Ritual</a>
-            <a href="#philosophy" className="text-bone-dim transition-colors duration-300 hover:text-gold">Philosophy</a>
+          <nav className="hidden items-center gap-10 text-[11px] font-medium uppercase tracking-[0.28em] md:flex">
+            <a href="#manifesto" className="text-[#b8ad9a] transition-colors duration-500 hover:text-[#e8e0d4]">Manifesto</a>
+            <a href="#collection" className="text-[#b8ad9a] transition-colors duration-500 hover:text-[#e8e0d4]">Collection</a>
+            <a href="#ritual" className="text-[#b8ad9a] transition-colors duration-500 hover:text-[#e8e0d4]">Ritual</a>
+            <a href="#philosophy" className="text-[#b8ad9a] transition-colors duration-500 hover:text-[#e8e0d4]">Philosophy</a>
           </nav>
           <button
             onClick={() => setCartOpen(true)}
-            className="relative inline-flex items-center gap-3 rounded-full border border-ink-soft bg-ink-soft/50 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.24em] text-bone transition-colors duration-300 hover:border-gold/50 hover:text-gold"
+            className="relative inline-flex items-center gap-3 rounded-full border border-[#a68a64]/40 bg-[#0d0c0b]/60 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.24em] text-[#e8e0d4] transition-all duration-500 hover:border-[#e8e0d4]/60 hover:text-[#e8e0d4]"
           >
             <span className="hidden sm:inline">Cart</span>
             {cartCount !== 0 && (
-              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gold/20 px-1.5 text-[10px] font-mono text-gold">
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#a68a64]/20 px-1.5 text-[10px] font-mono text-[#e8e0d4]">
                 {cartCount}
               </span>
             )}
@@ -176,81 +172,71 @@ export default function HomePage() {
       </header>
 
       {/* ==================== HERO ==================== */}
-      <section className="relative isolate min-h-[88vh] w-full overflow-hidden bg-[#060606]">
-        <div className="absolute inset-0 opacity-40">
-          <Silk speed={4} scale={1.1} color="#7B7481" noiseIntensity={1.2} />
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a0a0a]">
+        <div className="absolute inset-0 opacity-70">
+          <Silk speed={2} scale={1.2} color="#5c534a" noiseIntensity={1} />
         </div>
         <div className="absolute inset-0">
-          <Particles
-            particleColors={["#c9a96e", "#e8e0d4"]}
-            particleCount={120}
-            speed={0.4}
-          />
+          <Particles particleColors={["#a68a64", "#e8e0d4"]} particleCount={180} speed={0.2} />
         </div>
-        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#060606_70%)]" />
-        <div className="relative z-10 mx-auto flex min-h-[92vh] max-w-6xl flex-col items-center justify-center px-6 text-center">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/30 via-transparent to-[#0a0a0a]" />
+        <div className="relative z-10 mx-auto max-w-7xl px-6 text-center">
           <SplitText
             text="Maison Ode"
-            className="font-['Cormorant_Garamond',Georgia,serif] text-5xl font-medium uppercase tracking-wide text-[#e8e0d4] sm:text-6xl md:text-7xl"
-            delay={60}
-            duration={1.4}
+            className="font-['Playfair_Display',Georgia,serif] text-5xl font-medium uppercase tracking-wide text-[#e8e0d4] sm:text-6xl md:text-7xl lg:text-8xl"
+            delay={80}
+            duration={1.6}
             splitType="chars"
           />
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-[#b8ad9a]/90 sm:text-lg">
+          <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-[#b8ad9a]/90 md:text-xl">
             Parfums d&apos;ombre et de lumiere. Crafted in Grasse for those who move between poetry and provocation.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-12 flex items-center justify-center gap-5">
             <a
-              href="#manifesto"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-[#c9a96e]/60 px-7 text-sm font-medium uppercase tracking-widest text-[#e8e0d4] transition-colors duration-300 hover:border-[#e3c47d] hover:text-[#e3c47d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a96e]/60"
+              href="#collection"
+              className="inline-flex h-14 items-center justify-center rounded-full border border-[#a68a64]/60 bg-[#a68a64]/10 px-8 text-sm font-medium uppercase tracking-[0.2em] text-[#e8e0d4] transition-all duration-500 hover:bg-[#a68a64]/20 hover:border-[#e8e0d4]/60"
             >
-              Enter
-            </a>
-            <a
-              href="#products"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-[#b8ad9a]/30 px-7 text-sm font-medium uppercase tracking-widest text-[#b8ad9a] transition-colors duration-300 hover:border-[#b8ad9a] hover:text-[#e8e0d4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8ad9a]/50"
-            >
-              Collection
+              Enter the collection
             </a>
           </div>
         </div>
       </section>
 
       {/* ==================== MANIFESTO ==================== */}
-      <section id="manifesto" className="relative overflow-hidden border-b border-ink-soft/50 py-28 md:py-36">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(201,169,110,0.14) 0%, rgba(6,6,6,0) 70%)" }}
-        />
-        <div className="relative mx-auto max-w-4xl px-6 text-center">
-          <ScrollReveal containerClassName="font-mono text-[10px] uppercase tracking-[0.36em] text-gold inline-block" textClassName="font-mono text-[10px] uppercase tracking-[0.36em] text-gold inline-block">
-            Manifesto
-          </ScrollReveal>
-          <blockquote className="mx-auto mt-10 font-display text-3xl italic leading-snug text-bone md:text-[38px]">
+      <section id="manifesto" className="relative border-y border-[#a68a64]/20 py-32 md:py-44">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0f0e0c] to-[#0a0a0a]" />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <ScrollReveal
+            containerClassName="font-['Playfair_Display',Georgia,serif] text-3xl italic leading-snug text-[#e8e0d4] md:text-5xl"
+            textClassName="font-['Playfair_Display',Georgia,serif] text-3xl italic leading-snug text-[#e8e0d4] md:text-5xl"
+          >
             The most intimate accessory you will ever wear. It touches only the people you allow close.
-          </blockquote>
-          <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.28em] text-bone-dim">Jean-Marie Ode, Paris 2014</p>
+          </ScrollReveal>
+          <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.32em] text-[#a68a64]">Jean-Marie Ode, Paris 2014</p>
         </div>
       </section>
 
       {/* ==================== COLLECTION ==================== */}
-      <section id="products" className="py-24 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mx-auto mb-14 max-w-3xl text-center">
-            <ScrollReveal containerClassName="font-display text-4xl uppercase tracking-wide text-bone md:text-5xl inline-block" textClassName="font-display text-4xl uppercase tracking-wide text-bone md:text-5xl inline-block">
+      <section id="collection" className="relative bg-[#0a0a0a] py-32 md:py-40">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0d0c0b] to-[#0a0a0a]" />
+        <div className="relative mx-auto max-w-7xl px-6">
+          <div className="mb-20 text-center">
+            <ScrollReveal
+              containerClassName="font-['Playfair_Display',Georgia,serif] text-4xl uppercase tracking-wide text-[#e8e0d4] md:text-6xl inline-block"
+              textClassName="font-['Playfair_Display',Georgia,serif] text-4xl uppercase tracking-wide text-[#e8e0d4] md:text-6xl inline-block"
+            >
               The Collection
             </ScrollReveal>
-            <p className="mt-4 font-body text-bone/90">Three silences. Three intensities. Three ways to become the air in the room.</p>
+            <p className="mt-6 text-base text-[#b8ad9a]/80 md:text-lg">Three silences. Three intensities.</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-[1.1fr_0.9fr_0.9fr]">
-            {PRODUCTS.map((product) => (
-              <SpotlightCard key={product.id} className="!p-0">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {PRODUCTS.map((product, idx) => (
+              <SpotlightCard key={product.id} className="!rounded-none border border-[#a68a64]/10 bg-[#0f0e0c]/60">
                 <div className="flex h-full flex-col">
-                  <div className="flex aspect-[4/5] w-full items-center justify-center bg-gradient-to-b from-ink-soft/80 to-ink/60 p-8">
+                  <div className="flex aspect-[3/4] w-full items-center justify-center bg-gradient-to-b from-[#1a1816] to-[#0a0a0a] p-10">
                     <Float className="flex h-full w-full items-center justify-center">
-                      <svg viewBox="0 0 120 160" className="h-36 w-24 drop-shadow-[0_0_20px_rgba(201,169,110,0.35)]">
+                      <svg viewBox="0 0 120 160" className="h-40 w-28 drop-shadow-[0_0_30px_rgba(166,138,100,0.4)]">
                         <defs>
                           <linearGradient id={`bottle-${product.id}`} x1="0" x2="1" y1="0" y2="1">
                             <stop offset="0" stopColor="#e8e0d4" stopOpacity="0.95" />
@@ -258,28 +244,33 @@ export default function HomePage() {
                             <stop offset="1" stopColor="#7b756e" stopOpacity="0.95" />
                           </linearGradient>
                           <linearGradient id={`cap-${product.id}`} x1="0" x2="1" y1="0" y2="1">
-                            <stop offset="0" stopColor="#c9a96e" />
-                            <stop offset="1" stopColor="#7b5f3a" />
+                            <stop offset="0" stopColor="#a68a64" />
+                            <stop offset="1" stopColor="#6b5a44" />
                           </linearGradient>
                         </defs>
                         <rect x="44" y="0" width="32" height="22" rx="3" fill={`url(#cap-${product.id})`} />
                         <rect x="36" y="18" width="48" height="6" rx="1" fill="#b8ad9a" />
                         <path d="M36,26 L84,26 C92,26 98,36 98,52 L98,146 C98,152 92,158 86,158 L34,158 C28,158 22,152 22,146 L22,52 C22,36 28,26 36,26 Z" fill={`url(#bottle-${product.id})`} />
-                        <rect x="30" y="82" width="60" height="1" fill="#c9a96e" opacity="0.5" />
-                        <rect x="30" y="88" width="60" height="1" fill="#c9a96e" opacity="0.35" />
+                        <rect x="30" y="82" width="60" height="1" fill="#a68a64" opacity="0.5" />
+                        <rect x="30" y="88" width="60" height="1" fill="#a68a64" opacity="0.35" />
                       </svg>
                     </Float>
                   </div>
-                  <div className="border-t border-ink-soft/70 p-6">
+                  <div className="border-t border-[#a68a64]/15 p-7">
                     <div className="flex items-baseline justify-between gap-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-bone-dim">{product.size} • EdP</p>
-                      <span className="font-mono text-[13px] text-gold">{formatPrice(product.price)}</span>
+                      <p className="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.32em] text-[#b8ad9a]">
+                        {product.size} • EdP
+                      </p>
+                      <span className="font-['JetBrains_Mono',monospace] text-[13px] text-[#e8e0d4]">{formatPrice(product.price)}</span>
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-bone-dim">{product.description}</p>
-                    <div className="mt-5">
+                    <h3 className="mt-3 font-['Playfair_Display',Georgia,serif] text-xl uppercase tracking-wide text-[#e8e0d4]">
+                      {product.name}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-[#b8ad9a]/80">{product.description}</p>
+                    <div className="mt-6">
                       <button
                         onClick={() => addToCart(product)}
-                        className="inline-flex h-11 w-full items-center justify-center rounded-full border border-gold/60 bg-gold/10 px-5 text-[11px] font-medium uppercase tracking-[0.28em] text-gold transition-all duration-300 hover:bg-gold hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+                        className="inline-flex h-11 w-full items-center justify-center rounded-full border border-[#a68a64]/50 bg-transparent px-5 text-[11px] font-medium uppercase tracking-[0.28em] text-[#e8e0d4] transition-all duration-500 hover:border-[#e8e0d4]/80 hover:bg-[#e8e0d4]/5"
                       >
                         Add to bag
                       </button>
@@ -293,20 +284,26 @@ export default function HomePage() {
       </section>
 
       {/* ==================== RITUAL ==================== */}
-      <section id="ritual" className="border-t border-ink-soft/40 py-24 md:py-28">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 text-center">
-            <ScrollReveal containerClassName="font-mono text-[10px] uppercase tracking-[0.36em] text-gold inline-block" textClassName="font-mono text-[10px] uppercase tracking-[0.36em] text-gold inline-block">
+      <section id="ritual" className="relative border-y border-[#a68a64]/20 bg-[#0f0e0c] py-32 md:py-40">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0f0e0c] to-[#0a0a0a]" />
+        <div className="relative mx-auto max-w-7xl px-6">
+          <div className="mb-16 text-center">
+            <ScrollReveal
+              containerClassName="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.36em] text-[#a68a64] inline-block"
+              textClassName="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.36em] text-[#a68a64] inline-block"
+            >
               Ritual
             </ScrollReveal>
-            <h2 className="mt-6 font-display text-4xl uppercase tracking-wide text-bone md:text-5xl">Three moments. One evening.</h2>
+            <h2 className="mt-6 font-['Playfair_Display',Georgia,serif] text-4xl uppercase tracking-wide text-[#e8e0d4] md:text-5xl">
+              Three moments. One evening.
+            </h2>
           </div>
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-12 md:grid-cols-3 md:gap-16">
             {RITUAL_STEPS.map(({ step, title, text }) => (
-              <div key={step} className="relative border-t border-ink-soft/70 pt-8">
-                <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold">{step}</span>
-                <h3 className="mt-3 font-display text-3xl uppercase tracking-wide text-bone">{title}</h3>
-                <p className="mt-4 text-sm leading-relaxed text-bone-dim">{text}</p>
+              <div key={step} className="relative border-t border-[#a68a64]/30 pt-8">
+                <span className="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.32em] text-[#a68a64]">{step}</span>
+                <h3 className="mt-4 font-['Playfair_Display',Georgia,serif] text-3xl uppercase tracking-wide text-[#e8e0d4]">{title}</h3>
+                <p className="mt-4 text-base leading-relaxed text-[#b8ad9a]/80">{text}</p>
               </div>
             ))}
           </div>
@@ -314,58 +311,62 @@ export default function HomePage() {
       </section>
 
       {/* ==================== PHILOSOPHY ==================== */}
-      <section id="philosophy" className="border-t border-ink-soft/40 py-24 md:py-32">
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <ScrollReveal containerClassName="font-mono text-[10px] uppercase tracking-[0.36em] text-gold inline-block" textClassName="font-mono text-[10px] uppercase tracking-[0.36em] text-gold inline-block">
+      <section id="philosophy" className="relative bg-[#0a0a0a] py-32 md:py-40">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0f0e0c] to-[#0a0a0a]" />
+        <div className="relative mx-auto max-w-4xl px-6 text-center">
+          <ScrollReveal
+            containerClassName="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.36em] text-[#a68a64] inline-block"
+            textClassName="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.36em] text-[#a68a64] inline-block"
+          >
             Philosophy
           </ScrollReveal>
-          <h2 className="mt-6 font-display text-4xl uppercase tracking-wide text-bone md:text-[44px]">
+          <h2 className="mx-auto mt-10 max-w-3xl font-['Playfair_Display',Georgia,serif] text-3xl uppercase tracking-wide text-[#e8e0d4] md:text-5xl lg:text-6xl">
             More than fragrance. Memory before it becomes memory.
           </h2>
-          <p className="mx-auto mt-8 max-w-xl text-base leading-relaxed text-bone-dim">
+          <p className="mx-auto mt-10 max-w-2xl text-lg leading-relaxed text-[#b8ad9a]/80">
             Each Maison Ode composition is built around a single emotional landscape. We work only with small-batch extractions, natural absolutes and the quiet endurance of wood. There is no noise in our accords — only the things that matter when the lights go down.
           </p>
         </div>
       </section>
 
       {/* ==================== FOOTER ==================== */}
-      <footer className="border-t border-ink-soft/50 bg-ink-soft/30 py-16">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="grid gap-10 md:grid-cols-4">
+      <footer className="border-t border-[#a68a64]/20 bg-[#0f0e0c] py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-12 md:grid-cols-4">
             <div className="md:col-span-1">
-              <p className="font-display text-2xl tracking-wide text-bone">Maison Ode</p>
-              <p className="mt-3 text-sm text-bone-dim">
+              <p className="font-['Playfair_Display',Georgia,serif] text-2xl tracking-wide text-[#e8e0d4]">Maison Ode</p>
+              <p className="mt-4 text-sm text-[#b8ad9a]/80">
                 Parfumerie d&apos;attention.<br />
                 Paris • New York • Tokyo
               </p>
             </div>
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold">Fragrances</p>
-              <ul className="mt-4 space-y-2 text-sm text-bone-dim">
+              <p className="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.28em] text-[#a68a64]">Fragrances</p>
+              <ul className="mt-5 space-y-3 text-sm text-[#b8ad9a]/80">
                 <li>Midnight Velvet</li>
                 <li>Ivory Dusk</li>
                 <li>Noir Absolu</li>
               </ul>
             </div>
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold">House</p>
-              <ul className="mt-4 space-y-2 text-sm text-bone-dim">
+              <p className="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.28em] text-[#a68a64]">House</p>
+              <ul className="mt-5 space-y-3 text-sm text-[#b8ad9a]/80">
                 <li>Story</li>
                 <li>Atelier</li>
                 <li>Journal</li>
               </ul>
             </div>
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold">Client care</p>
-              <ul className="mt-4 space-y-2 text-sm text-bone-dim">
+              <p className="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.28em] text-[#a68a64]">Client care</p>
+              <ul className="mt-5 space-y-3 text-sm text-[#b8ad9a]/80">
                 <li>Contact</li>
                 <li>Shipping</li>
                 <li>Returns</li>
               </ul>
-              <p className="mt-4 font-mono text-[11px] text-bone-dim">care@maisonode.com</p>
+              <p className="mt-5 font-['JetBrains_Mono',monospace] text-[11px] text-[#b8ad9a]/80">care@maisonode.com</p>
             </div>
           </div>
-          <div className="mt-14 flex flex-col gap-4 border-t border-ink-soft/60 pt-8 text-[11px] font-mono uppercase tracking-[0.24em] text-bone-dim md:flex-row md:items-center md:justify-between">
+          <div className="mt-16 flex flex-col gap-4 border-t border-[#a68a64]/15 pt-8 text-[11px] font-['JetBrains_Mono',monospace] uppercase tracking-[0.24em] text-[#b8ad9a]/60 md:flex-row md:items-center md:justify-between">
             <span>© {new Date().getFullYear()} Maison Ode. All rights reserved.</span>
             <span>Crafted with restraint.</span>
           </div>
@@ -378,7 +379,7 @@ export default function HomePage() {
         aria-hidden="true"
         data-cart-overlay
         className={cn(
-          "fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-black/70 backdrop-blur-md transition-opacity duration-500",
           cartOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       />
@@ -387,18 +388,20 @@ export default function HomePage() {
       <aside
         aria-label="Shopping bag"
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex max-w-md w-full -translate-x-0 flex-col border-l border-ink-soft/70 bg-ink shadow-[0_40px_80px_-20px_rgba(0,0,0,0.85)] transition-transform duration-300 md:translate-x-0",
+          "fixed inset-y-0 right-0 z-50 flex max-w-md w-full -translate-x-0 flex-col border-l border-[#a68a64]/20 bg-[#0f0e0c]/95 backdrop-blur-xl transition-transform duration-500 md:translate-x-0",
           cartOpen ? "translate-x-0" : "translate-x-full",
         )}
         style={{ display: cartOpen ? "flex" : "none" }}
       >
-        <div className="flex items-center justify-between border-b border-ink-soft/70 px-6 py-5">
-          <p className="font-display text-xl uppercase tracking-wide text-bone">Your bag</p>
+        <div className="flex items-center justify-between border-b border-[#a68a64]/15 px-6 py-5">
+          <p className="font-['Playfair_Display',Georgia,serif] text-xl uppercase tracking-wide text-[#e8e0d4]">Your bag</p>
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[11px] text-bone-dim">{cartCount} {cartCount === 1 ? "item" : "items"}</span>
+            <span className="font-['JetBrains_Mono',monospace] text-[11px] text-[#b8ad9a]">
+              {cartCount} {cartCount === 1 ? "item" : "items"}
+            </span>
             <button
               onClick={() => setCartOpen(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-ink-soft text-bone-dim transition-colors duration-300 hover:border-gold hover:text-gold"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#a68a64]/40 text-[#b8ad9a] transition-all duration-300 hover:border-[#e8e0d4]/60 hover:text-[#e8e0d4]"
               aria-label="Close cart"
             >
               ✕
@@ -409,11 +412,11 @@ export default function HomePage() {
         <div className="flex-1 overflow-y-auto px-6 py-6">
           {cart.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-5 text-center">
-              <span aria-hidden="true" className="h-24 w-24 rounded-full border border-ink-soft/60 bg-ink-soft/50" />
-              <p className="max-w-xs text-sm text-bone-dim">Your bag is quiet.</p>
+              <span aria-hidden="true" className="h-24 w-24 rounded-full border border-[#a68a64]/30 bg-[#0a0a0a]/50" />
+              <p className="max-w-xs text-sm text-[#b8ad9a]/80">Your bag is quiet.</p>
               <button
                 onClick={() => setCartOpen(false)}
-                className="inline-flex h-10 items-center justify-center rounded-full border border-gold/60 px-6 text-[11px] font-medium uppercase tracking-[0.28em] text-gold transition-colors duration-300 hover:bg-gold hover:text-ink"
+                className="inline-flex h-10 items-center justify-center rounded-full border border-[#a68a64]/50 px-6 text-[11px] font-medium uppercase tracking-[0.28em] text-[#e8e0d4] transition-all duration-500 hover:border-[#e8e0d4]/80"
               >
                 Continue shopping
               </button>
@@ -421,28 +424,28 @@ export default function HomePage() {
           ) : (
             <ul className="space-y-5">
               {cart.map((item) => (
-                <li key={item.id} className="grid grid-cols-[80px_1fr_auto] items-start gap-4 rounded-2xl border border-ink-soft/50 bg-ink-soft/40 p-3">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-ink-soft">
-                    <div className="h-14 w-14 rounded-full bg-bone/8" />
+                <li key={item.id} className="grid grid-cols-[80px_1fr_auto] items-start gap-4 rounded-2xl border border-[#a68a64]/10 bg-[#0a0a0a]/40 p-3">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-[#1a1816]">
+                    <div className="h-14 w-14 rounded-full bg-[#a68a64]/10" />
                   </div>
                   <div className="space-y-1">
                     <div className="flex items-baseline justify-between gap-3">
-                      <p className="font-display text-base uppercase text-bone">{item.name}</p>
-                      <span className="font-mono text-[12px] text-gold">{formatPrice(item.price * item.quantity)}</span>
+                      <p className="font-['Playfair_Display',Georgia,serif] text-base uppercase text-[#e8e0d4]">{item.name}</p>
+                      <span className="font-['JetBrains_Mono',monospace] text-[12px] text-[#e8e0d4]">{formatPrice(item.price * item.quantity)}</span>
                     </div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-bone-dim">{item.size}</p>
-                    <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-ink-soft/60 bg-ink-soft/60 px-1">
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.28em] text-[#b8ad9a]">{item.size}</p>
+                    <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-[#a68a64]/40 bg-[#0a0a0a]/60 px-1">
                       <button
                         onClick={() => decrement(item.id)}
-                        className="flex h-7 w-7 items-center justify-center text-bone-dim transition-colors duration-300 hover:text-bone"
+                        className="flex h-7 w-7 items-center justify-center text-[#b8ad9a] transition-colors duration-300 hover:text-[#e8e0d4]"
                         aria-label={`Decrease quantity for ${item.name}`}
                       >
                         −
                       </button>
-                      <span className="min-w-[18px] text-center text-[11px] font-mono text-bone">{item.quantity}</span>
+                      <span className="min-w-[18px] text-center text-[11px] font-['JetBrains_Mono',monospace] text-[#e8e0d4]">{item.quantity}</span>
                       <button
                         onClick={() => increment(item.id)}
-                        className="flex h-7 w-7 items-center justify-center text-bone-dim transition-colors duration-300 hover:text-bone"
+                        className="flex h-7 w-7 items-center justify-center text-[#b8ad9a] transition-colors duration-300 hover:text-[#e8e0d4]"
                         aria-label={`Increase quantity for ${item.name}`}
                       >
                         +
@@ -451,7 +454,7 @@ export default function HomePage() {
                   </div>
                   <button
                     onClick={() => removeFromCart(item.id)}
-                    className="mt-1 text-[11px] font-mono uppercase tracking-wider text-bone-dim transition-colors duration-300 hover:text-gold"
+                    className="mt-1 text-[11px] font-['JetBrains_Mono',monospace] uppercase tracking-wider text-[#b8ad9a] transition-colors duration-300 hover:text-[#e8e0d4]"
                     aria-label={`Remove ${item.name} from bag`}
                   >
                     Remove
@@ -463,13 +466,13 @@ export default function HomePage() {
         </div>
 
         {cart.length > 0 && (
-          <div className="border-t border-ink-soft/70 px-6 py-5">
+          <div className="border-t border-[#a68a64]/15 px-6 py-5">
             <div className="flex items-center justify-between gap-4">
-              <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-bone-dim">Subtotal</span>
-              <span className="font-mono text-[13px] text-gold">{formatPrice(cartTotal)}</span>
+              <span className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.24em] text-[#b8ad9a]">Subtotal</span>
+              <span className="font-['JetBrains_Mono',monospace] text-[13px] text-[#e8e0d4]">{formatPrice(cartTotal)}</span>
             </div>
-            <p className="mt-2 text-[11px] text-bone-dim">Shipping calculated at checkout.</p>
-            <button className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full border border-gold/60 bg-gold/10 px-5 text-[11px] font-medium uppercase tracking-[0.28em] text-gold transition-all duration-300 hover:bg-gold hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60">
+            <p className="mt-2 text-[11px] text-[#b8ad9a]/60">Shipping calculated at checkout.</p>
+            <button className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-full border border-[#a68a64]/50 bg-transparent px-5 text-[11px] font-medium uppercase tracking-[0.28em] text-[#e8e0d4] transition-all duration-500 hover:border-[#e8e0d4]/80 hover:bg-[#e8e0d4]/5">
               Checkout
             </button>
           </div>
