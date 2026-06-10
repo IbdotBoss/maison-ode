@@ -1,30 +1,36 @@
-# COMPOSITION PLAN — Maison Ode webapp
+# COMPOSITION PLAN — Maison Ode lookbook
 
-Hero scale:
-- Giant Statement with cinematic motion + low-text overlay
+Hero scale: Giant Statement
+Sections:
+  1. Hero — anchor: cinema, background: Silk motion canvas, layout: centered low stack
+  2. Manifesto — anchor: words, background: full-bleed dark tone with radial light, layout: oversized centered quote
+  3. Collection — anchor: bottles, background: ink surface, layout: asymmetric 2+1 editorial grid
+  4. Ritual — anchor: moments, background: ink-soft surface, layout: horizontal stacked timeline
+  5. Philosophy — anchor: voice, background: ink surface with thin gold rule, layout: single centered statement with pull quote
+  6. Footer — anchor: close, background: ink-soft surface, layout: expanded tonal close with tagline + care info
 
-Sections + anchors + backgrounds:
-1. Nav — fixed top bar, glass ink surface, centered brand
-2. Hero (HeroSilk) — Giant Statement, centered low anchor over atmospheric motion gradient background
-3. Products — editorial grid with SpotlightCard products; asymmetric card stack
-4. Philosophy — centered statement, solid surface with border
-5. Manifesto — centered statement, atmospheric radial gradient background
-6. Ritual — stacked editorial cards, flat ink surfaces
-7. Trust strip — mini minimal, solid surface
-8. Footer — mini minimal, tonal ink-soft surface
-
-Variety check:
-- anchors: centered low, editorial grid, centered statement, centered statement, 3-column grid
-- backgrounds: atmospheric gradient, solid surface, radial atmospheric, solid surface, solid surface
-- repetition within limits
+Variety check: passed — 6 distinct layout families (centered stack, full-bleed quote, asymmetric grid, horizontal timeline, centered statement, expanded footer)
 
 Media plan:
-- hero: CSS-generated gradient orbs + vignette
-- products: abstract radial accent per card
-- ritual: no external media
-- trust: no media
+- Hero: Silk reactive shader; CSS noise grain overlay for tactile feel
+- Manifesto: no external media, atmospheric radial only
+- Collection: inline bottle SVG artwork per product, no placeholder gradients
+- Ritual: typographic only
+- Philosophy: typographic only
+- Footer: typographic only
 
-Component notes:
-- HeroSilk provides cinematic reveal + reduced-motion path
-- SpotlightCard provides cursor-follow radial highlight
-- Cart behavior is page-level state in page.tsx
+Anti-slop checks:
+- No eyebrow labels on every section
+- No scroll cue
+- No decorative dividers between every section
+- No identical card grid repeated in adjacent sections (collection grid, then ritual grid)
+- No rounded-corner image boxes everywhere
+- Hero stack discipline: headline + subtext + 2 CTAs max
+
+Library component assignment:
+- Silk: hero background
+- ScrollReveal: section taglines
+- SpotlightCard: product cards
+- Float: product bottle motion
+- ScrambleHover: removed from nav (animation friction risk)
+- NumberTicker: removed from trust strip (doesn't serve the lookbook goal)
