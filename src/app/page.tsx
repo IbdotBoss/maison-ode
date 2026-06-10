@@ -7,6 +7,8 @@ import ScrollReveal from "@/components/ScrollReveal";
 import SpotlightCard from "@/components/SpotlightCard";
 import { cn, formatPrice } from "@/lib/utils";
 import Float from "@/components/fancy/blocks/float";
+import SplashCursor from "@/components/SplashCursor";
+import Particles from "@/components/Particles";
 
 /* ---------- Types & initial data ---------- */
 
@@ -53,6 +55,23 @@ const RITUAL_STEPS = [
   { step: "03", title: "Remember", text: "Do not over-apply. The object is not to announce yourself but to stay." },
 ];
 
+const NOISE_CSS = `
+  .noise-overlay::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .noise-overlay::after { animation: none; opacity: 0.02; }
+  }
+`;
+
 /* ---------- Page ---------- */
 
 export default function HomePage() {
@@ -62,6 +81,13 @@ export default function HomePage() {
 
   const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + item.price * item.quantity, 0), [cart]);
+
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = NOISE_CSS;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -74,9 +100,7 @@ export default function HomePage() {
   useEffect(() => {
     if (cartOpen) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [cartOpen]);
 
   const showToast = (message: string) => {
@@ -110,7 +134,8 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-ink text-bone-dim">
+    <div className="noise-overlay min-h-screen bg-ink text-bone-dim">
+
       {/* ==================== TOAST ==================== */}
       <div
         aria-live="polite"
@@ -130,25 +155,17 @@ export default function HomePage() {
           <a href="#" className="font-display text-2xl tracking-wide text-bone sm:text-[26px]">
             Maison Ode
           </a>
-
           <nav className="hidden items-center gap-8 text-[11px] font-medium uppercase tracking-[0.24em] md:flex">
             <a href="#manifesto" className="text-bone-dim transition-colors duration-300 hover:text-gold">Manifesto</a>
             <a href="#products" className="text-bone-dim transition-colors duration-300 hover:text-gold">Collection</a>
             <a href="#ritual" className="text-bone-dim transition-colors duration-300 hover:text-gold">Ritual</a>
             <a href="#philosophy" className="text-bone-dim transition-colors duration-300 hover:text-gold">Philosophy</a>
           </nav>
-
           <button
             onClick={() => setCartOpen(true)}
             className="relative inline-flex items-center gap-3 rounded-full border border-ink-soft bg-ink-soft/50 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.24em] text-bone transition-colors duration-300 hover:border-gold/50 hover:text-gold"
           >
             <span className="hidden sm:inline">Cart</span>
-            {cartCount !== 0 && (
-              <span className="relative inline-flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
-              </span>
-            )}
             {cartCount !== 0 && (
               <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gold/20 px-1.5 text-[10px] font-mono text-gold">
                 {cartCount}
@@ -160,16 +177,23 @@ export default function HomePage() {
 
       {/* ==================== HERO ==================== */}
       <section className="relative isolate min-h-[88vh] w-full overflow-hidden bg-[#060606]">
-        <div className="absolute inset-0">
-          <Silk speed={5} scale={1} color="#7B7481" noiseIntensity={1.5} />
+        <div className="absolute inset-0 opacity-40">
+          <Silk speed={4} scale={1.1} color="#7B7481" noiseIntensity={1.2} />
         </div>
-        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#060606_62%)]" />
+        <div className="absolute inset-0">
+          <Particles
+            particleColors={["#c9a96e", "#e8e0d4"]}
+            particleCount={120}
+            speed={0.4}
+          />
+        </div>
+        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#060606_70%)]" />
         <div className="relative z-10 mx-auto flex min-h-[92vh] max-w-6xl flex-col items-center justify-center px-6 text-center">
           <SplitText
             text="Maison Ode"
             className="font-['Cormorant_Garamond',Georgia,serif] text-5xl font-medium uppercase tracking-wide text-[#e8e0d4] sm:text-6xl md:text-7xl"
-            delay={50}
-            duration={1.25}
+            delay={60}
+            duration={1.4}
             splitType="chars"
           />
           <p className="mt-6 max-w-xl text-base leading-relaxed text-[#b8ad9a]/90 sm:text-lg">
@@ -197,7 +221,7 @@ export default function HomePage() {
         <div
           aria-hidden="true"
           className="absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(201,169,110,0.12) 0%, rgba(6,6,6,0) 70%)" }}
+          style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(201,169,110,0.14) 0%, rgba(6,6,6,0) 70%)" }}
         />
         <div className="relative mx-auto max-w-4xl px-6 text-center">
           <ScrollReveal containerClassName="font-mono text-[10px] uppercase tracking-[0.36em] text-gold inline-block" textClassName="font-mono text-[10px] uppercase tracking-[0.36em] text-gold inline-block">
@@ -228,19 +252,19 @@ export default function HomePage() {
                     <Float className="flex h-full w-full items-center justify-center">
                       <svg viewBox="0 0 120 160" className="h-36 w-24 drop-shadow-[0_0_20px_rgba(201,169,110,0.35)]">
                         <defs>
-                          <linearGradient id="bottle-${product.id}" x1="0" x2="1" y1="0" y2="1">
+                          <linearGradient id={`bottle-${product.id}`} x1="0" x2="1" y1="0" y2="1">
                             <stop offset="0" stopColor="#e8e0d4" stopOpacity="0.95" />
                             <stop offset="0.5" stopColor="#b8ad9a" stopOpacity="0.85" />
                             <stop offset="1" stopColor="#7b756e" stopOpacity="0.95" />
                           </linearGradient>
-                          <linearGradient id="cap-${product.id}" x1="0" x2="1" y1="0" y2="1">
+                          <linearGradient id={`cap-${product.id}`} x1="0" x2="1" y1="0" y2="1">
                             <stop offset="0" stopColor="#c9a96e" />
                             <stop offset="1" stopColor="#7b5f3a" />
                           </linearGradient>
                         </defs>
-                        <rect x="44" y="0" width="32" height="22" rx="3" fill={"url(#cap-${product.id})"} />
+                        <rect x="44" y="0" width="32" height="22" rx="3" fill={`url(#cap-${product.id})`} />
                         <rect x="36" y="18" width="48" height="6" rx="1" fill="#b8ad9a" />
-                        <path d="M36,26 L84,26 C92,26 98,36 98,52 L98,146 C98,152 92,158 86,158 L34,158 C28,158 22,152 22,146 L22,52 C22,36 28,26 36,26 Z" fill={"url(#bottle-${product.id})"} />
+                        <path d="M36,26 L84,26 C92,26 98,36 98,52 L98,146 C98,152 92,158 86,158 L34,158 C28,158 22,152 22,146 L22,52 C22,36 28,26 36,26 Z" fill={`url(#bottle-${product.id})`} />
                         <rect x="30" y="82" width="60" height="1" fill="#c9a96e" opacity="0.5" />
                         <rect x="30" y="88" width="60" height="1" fill="#c9a96e" opacity="0.35" />
                       </svg>
@@ -277,7 +301,6 @@ export default function HomePage() {
             </ScrollReveal>
             <h2 className="mt-6 font-display text-4xl uppercase tracking-wide text-bone md:text-5xl">Three moments. One evening.</h2>
           </div>
-
           <div className="grid gap-8 md:grid-cols-3">
             {RITUAL_STEPS.map(({ step, title, text }) => (
               <div key={step} className="relative border-t border-ink-soft/70 pt-8">
@@ -364,7 +387,7 @@ export default function HomePage() {
       <aside
         aria-label="Shopping bag"
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex max-w-md w-full translate-x-0 flex-col border-l border-ink-soft/70 bg-ink shadow-[0_40px_80px_-20px_rgba(0,0,0,0.85)] transition-transform duration-300 md:translate-x-0",
+          "fixed inset-y-0 right-0 z-50 flex max-w-md w-full -translate-x-0 flex-col border-l border-ink-soft/70 bg-ink shadow-[0_40px_80px_-20px_rgba(0,0,0,0.85)] transition-transform duration-300 md:translate-x-0",
           cartOpen ? "translate-x-0" : "translate-x-full",
         )}
         style={{ display: cartOpen ? "flex" : "none" }}
