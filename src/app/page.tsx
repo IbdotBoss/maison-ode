@@ -7,6 +7,8 @@ import ScrollReveal from "@/components/ScrollReveal";
 import SpotlightCard from "@/components/SpotlightCard";
 import { cn, formatPrice } from "@/lib/utils";
 import Float from "@/components/fancy/blocks/float";
+import ScrambleHover from "@/components/fancy/text/scramble-hover";
+import NumberTicker from "@/components/fancy/text/basic-number-ticker";
 
 /* ---------- Types & initial data ---------- */
 
@@ -142,13 +144,13 @@ export default function HomePage() {
 
           <nav className="hidden items-center gap-8 text-[11px] font-medium uppercase tracking-[0.24em] md:flex">
             <a href="#products" className="text-bone-dim transition-colors duration-300 hover:text-gold">
-              Collection
+              <ScrambleHover text="Collection" scrambleSpeed={35} className="text-[11px] font-medium uppercase tracking-[0.24em]" />
             </a>
             <a href="#ritual" className="text-bone-dim transition-colors duration-300 hover:text-gold">
-              Ritual
+              <ScrambleHover text="Ritual" scrambleSpeed={35} className="text-[11px] font-medium uppercase tracking-[0.24em]" />
             </a>
             <a href="#philosophy" className="text-bone-dim transition-colors duration-300 hover:text-gold">
-              Philosophy
+              <ScrambleHover text="Philosophy" scrambleSpeed={35} className="text-[11px] font-medium uppercase tracking-[0.24em]" />
             </a>
           </nav>
 
@@ -353,15 +355,27 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {[
-              "Natural absolutes",
-              "Grasse, France",
-              "Cruelty free",
-              "Carbon neutral",
-            ].map((item) => (
-              <div key={item} className="text-center">
-                <p className="mx-auto font-mono text-[10px] uppercase tracking-[0.32em] text-bone-dim">
-                  {item}
-                </p>
+              { label: "Natural absolutes", value: null },
+              { label: "Founded", value: 2014 },
+              { label: "Formulations", value: 3 },
+              { label: "Carbon neutral", value: null },
+            ].map(({ label, value }) => (
+              <div key={label} className="text-center">
+                {value ? (
+                  <NumberTicker
+                    from={0}
+                    target={value}
+                    transition={{ duration: 3, type: "tween", ease: "easeInOut" }}
+                    className="font-mono text-[10px] uppercase tracking-[0.32em] text-bone-dim"
+                  />
+                ) : (
+                  <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-bone-dim">
+                    {label}
+                  </p>
+                )}
+                {value ? (
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-bone-dim/70">{label}</p>
+                ) : null}
               </div>
             ))}
           </div>
